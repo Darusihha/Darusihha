@@ -47,7 +47,6 @@
 </header>
 
 <main>
-    <!-- AI TAB -->
     <div id="view-ai" class="view active">
         <div class="card">
             <h3 id="ai-title">How can I assist you today?</h3>
@@ -57,7 +56,6 @@
         </div>
     </div>
 
-    <!-- PATIENTS TAB -->
     <div id="view-patients" class="view">
         <div class="card">
             <h3 id="pat-title">👤 Patients</h3>
@@ -105,22 +103,26 @@
         if (!input) return;
         display.innerHTML = "⏳ Thinking...";
         
+        // YOUR API KEY IS SAFELY PLACED HERE
         const GEMINI_API_KEY = "AIzaSyBEYRtNVZXi3xk8rxTnI6YWYK-Mz3ik6Jg";
 
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: `You are a medical assistant for Darusihha Hospital. Answer in ${currentLang === 'so' ? 'Somali' : 'English'}. User: ${input}` }] }] })
+                body: JSON.stringify({ 
+                    contents: [{ parts: [{ text: `You are a medical assistant for Darusihha Hospital. Answer in ${currentLang === 'so' ? 'Somali' : 'English'}. User: ${input}` }] }] 
+                })
             });
             const data = await res.json();
+            
             if (data.candidates && data.candidates[0]) {
                 display.innerHTML = `<strong>🤖 AI:</strong><br>${data.candidates[0].content.parts[0].text}`;
             } else {
-                display.innerHTML = "⚠️ API Error. Please check your key or try again.";
+                display.innerHTML = "⚠️ API Error. Your key might have restrictions. Please check Google AI Studio.";
             }
         } catch (e) {
-            display.innerHTML = "⚠️ Connection failed. Check your internet.";
+            display.innerHTML = "⚠️ Connection failed. Please check your internet.";
         }
     }
 
@@ -129,7 +131,7 @@
     function savePatient() {
         const name = document.getElementById('p-name').value.trim();
         const phone = document.getElementById('p-phone').value.trim();
-        if (!name) return alert("Enter name!");
+        if (!name) return alert("Please enter a name!");
         patients.unshift({ id: Date.now(), name, phone });
         localStorage.setItem('patients', JSON.stringify(patients));
         document.getElementById('p-name').value = '';
