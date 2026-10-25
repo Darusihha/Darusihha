@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darusihha Mega System</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#003399">
+    <style>
+        :root { --primary: #003399; --secondary: #00a651; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, sans-serif; background: #f4f7f9; padding-bottom: 80px; }
+        header { background: var(--primary); color: white; padding: 15px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+        header img { width: 45px; height: 45px; border-radius: 50%; background: white; }
+        .header-text h1 { font-size: 1rem; }
+        .header-text p { font-size: 0.7rem; opacity: 0.8; }
+        .lang-switch { margin-left: auto; display: flex; gap: 6px; }
+        .lang-switch button { padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); color: white; }
+        .lang-switch button.active { background: white; color: var(--primary); }
+        main { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card h3 { color: var(--primary); margin-bottom: 12px; font-size: 1.05rem; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; font-size: 1rem; }
+        button.btn { background: var(--secondary); color: white; border: none; padding: 13px; width: 100%; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); z-index: 200; }
+        nav button { background: none; border: none; font-size: 1.6rem; cursor: pointer; padding: 5px 15px; border-radius: 6px; }
+        nav button.active { background: rgba(0,51,153,0.1); }
+        .view { display: none; } .view.active { display: block; }
+        #ai-response { background: #e6f2ff; padding: 14px; border-radius: 8px; margin-top: 12px; min-height: 60px; line-height: 1.5; white-space: pre-wrap; }
+        .patient-item { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .patient-name { font-weight: 600; }
+        .patient-phone { font-size: 0.9rem; color: #666; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/50/003399/ffffff?text=DIH'">
+    <div class="header-text">
+        <h1>DARUSIHHA</h1>
+        <p>International Hospitals</p>
+    </div>
+    <div class="lang-switch">
+        <button onclick="setLang('en')" id="btn-en" class="active">EN</button>
+        <button onclick="setLang('so')" id="btn-so">SO</button>
+    </div>
+</header>
+
+<main>
+    <div id="view-ai" class="view active">
+        <div class="card">
+            <h3 id="ai-title">How can I assist you today?</h3>
+            <input type="text" id="ai-input" placeholder="Ask about medical protocols...">
+            <button class="btn" onclick="runAI()">🤖 Ask AI Assistant</button>
+            <div id="ai-response"></div>
+        </div>
+    </div>
+
+    <div id="view-patients" class="view">
+        <div class="card">
+            <h3 id="pat-title">👤 Patients</h3>
+            <input type="text" id="p-name" placeholder="Full Name / Magaca Buuxa">
+            <input type="text" id="p-phone" placeholder="Phone / Telefoonka">
+            <button class="btn" onclick="savePatient()">Save Record / Kaydi</button>
+        </div>
+        <div class="card">
+            <h3>📋 Patient List / Liiska</h3>
+            <div id="patient-list"></div>
+        </div>
+    </div>
+</main>
+
+<nav>
+    <button onclick="switchView('ai')" id="tab-ai" class="active">🤖</button>
+    <button onclick="switchView('patients')" id="tab-patients">👤</button>
+</nav>
+
+<script>
+    let currentLang = 'en';
+    const dict = {
+        'en': { ai_title: "How can I assist you today?", pat_title: "👤 Patients" },
+        'so': { ai_title: "Sidee maanta kuu caawin karaa?", pat_title: "👤 Bukaannada" }
+    };
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        document.getElementById('btn-so').classList.toggle('active', lang === 'so');
+        document.getElementById('ai-title').innerText = dict[lang].ai_title;
+        document.getElementById('pat-title').innerText = dict[lang].pat_title;
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
+        document.getElementById('tab-' + viewId).classList.add('active');
+    }
+
+    async function runAI() {
+        const input = document.getElementById('ai-input').value.trim();
+        const display = document.getElementById('ai-response');
+        if (!input) return;
+        display.innerHTML = "⏳ Thinking...";
+        
+        const GEMINI_API_KEY = "YOUR_KEY_HERE"; 
+        
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: `You are a medical assistant for Darusihha Hospital. Answer in ${currentLang === 'so' ? 'Somali' : 'English'}. User: ${input}` }] }] })
+            });
+            const data = await res.json();
+            display.innerHTML = `<strong>🤖 AI:</strong><br>${data.candidates[0].content.parts[0].text}`;
+        } catch (e) {
+            display.innerHTML = "⚠️ Add your Gemini API key in the code to make me work!";
+        }
+    }
+
+    let patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    
+    function savePatient() {
+        const name = document.getElementById('p-name').value.trim();
+        const phone = document.getElementById('p-phone').value.trim();
+        if (!name) return alert("Enter name!");
+        patients.unshift({ id: Date.now(), name, phone });
+        localStorage.setItem('patients', JSON.stringify(patients));
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-phone').value = '';
+        renderPatients();
+    }
+
+    function renderPatients() {
+        const list = document.getElementById('patient-list');
+        if (patients.length === 0) { list.innerHTML = "<div style='color:#888;'>No patients added yet.</div>"; return; }
+        list.innerHTML = patients.map(p => `
+            <div class="patient-item">
+                <div class="patient-name">${p.name}</div>
+                <div class="patient-phone">📞 ${p.phone || '—'}</div>
+            </div>
+        `).join('');
+    }
+
+    renderPatients();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
