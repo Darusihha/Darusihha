@@ -11,7 +11,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, sans-serif; background: #f4f7f9; padding-bottom: 80px; }
         header { background: var(--primary); color: white; padding: 15px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
-        header img { width: 45px; height: 45px; border-radius: 50%; background: white; }
+        header img { width: 45px; height: 45px; border-radius: 50%; background: white; object-fit: contain; }
         .header-text h1 { font-size: 1rem; }
         .header-text p { font-size: 0.7rem; opacity: 0.8; }
         .lang-switch { margin-left: auto; display: flex; gap: 6px; }
@@ -35,7 +35,7 @@
 <body>
 
 <header>
-<img src="IMG-20261026-WA0000.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/50/003399/ffffff?text=DIH'">
+    <img src="IMG-20261026-WA0000.jpg" alt="Logo">
     <div class="header-text">
         <h1>DARUSIHHA</h1>
         <p>International Hospitals</p>
@@ -47,6 +47,7 @@
 </header>
 
 <main>
+    <!-- AI TAB -->
     <div id="view-ai" class="view active">
         <div class="card">
             <h3 id="ai-title">How can I assist you today?</h3>
@@ -56,6 +57,7 @@
         </div>
     </div>
 
+    <!-- PATIENTS TAB -->
     <div id="view-patients" class="view">
         <div class="card">
             <h3 id="pat-title">👤 Patients</h3>
@@ -103,8 +105,8 @@
         if (!input) return;
         display.innerHTML = "⏳ Thinking...";
         
-        const GEMINI_API_KEY = "YOUR_KEY_HERE"; 
-        
+        const GEMINI_API_KEY = "AIzaSyBEYRtNVZXi3xk8rxTnI6YWYK-Mz3ik6Jg";
+
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
@@ -112,9 +114,13 @@
                 body: JSON.stringify({ contents: [{ parts: [{ text: `You are a medical assistant for Darusihha Hospital. Answer in ${currentLang === 'so' ? 'Somali' : 'English'}. User: ${input}` }] }] })
             });
             const data = await res.json();
-            display.innerHTML = `<strong>🤖 AI:</strong><br>${data.candidates[0].content.parts[0].text}`;
+            if (data.candidates && data.candidates[0]) {
+                display.innerHTML = `<strong>🤖 AI:</strong><br>${data.candidates[0].content.parts[0].text}`;
+            } else {
+                display.innerHTML = "⚠️ API Error. Please check your key or try again.";
+            }
         } catch (e) {
-            display.innerHTML = "⚠️ Add your Gemini API key in the code to make me work!";
+            display.innerHTML = "⚠️ Connection failed. Check your internet.";
         }
     }
 
