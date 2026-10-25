@@ -1,4 +1,4 @@
-const CACHE = 'darusihha-v1';
+const CACHE = 'darusihha-v2';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => { 
