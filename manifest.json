@@ -5,5 +5,5 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003399",
-  "icons": [{ "src": "logo.png", "sizes": "192x192 512x512", "type": "image/png" }]
+  "icons": [{ "src": "IMG-20261026-WA0000.jpg", "sizes": "192x192 512x512", "type": "image/jpeg" }]
 }
