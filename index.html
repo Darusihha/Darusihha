@@ -106,22 +106,25 @@
         const GEMINI_API_KEY = "AIzaSyBEYRtNVZXi3xk8rxTnI6YWYK-Mz3ik6Jg";
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     contents: [{ parts: [{ text: `You are a medical assistant for Darusihha Hospital. Answer in ${currentLang === 'so' ? 'Somali' : 'English'}. User: ${input}` }] }] 
                 })
             });
+            
             const data = await res.json();
             
             if (data.candidates && data.candidates[0]) {
                 display.innerHTML = `<strong>🤖 AI:</strong><br>${data.candidates[0].content.parts[0].text}`;
+            } else if (data.error) {
+                display.innerHTML = `<strong>⚠️ API Error:</strong><br>${data.error.message}`;
             } else {
-                display.innerHTML = "⚠️ API Error. Please check Google AI Studio settings.";
+                display.innerHTML = "⚠️ Unknown error occurred. Please try again.";
             }
         } catch (e) {
-            display.innerHTML = "⚠️ Connection failed. Please check your internet.";
+            display.innerHTML = "⚠️ Connection failed. Check your internet or key restrictions.";
         }
     }
 
